@@ -4,13 +4,7 @@ import click
 import main
 from main import add_entry, update_entry, delete_entry, fetch_entries
 
-
-"""
-Setup connection with database
-"""
-conn = sqlite3.connect('db.sqlite3')
-
-
+""" Setup Command Group """
 @click.group()
 def cli():
 	"CLI extension for to-do list app"
@@ -45,9 +39,8 @@ def delete():
 def tasks():
 	"Display all the tasks added by the user"
 	entries = fetch_entries()
-	print(tabulate(entries, headers=['Task', 'Due Date', 'Notes'], tablefmt='orgtbl'))
+	print(tabulate(entries, headers=['ID', 'Task', 'Due Date', 'Notes'], tablefmt='orgtbl'))
 
-"""
-Close the connection with database
-"""
-conn.close()
+
+if __name__ == '__main__':
+	cli()
