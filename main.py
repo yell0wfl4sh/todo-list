@@ -4,10 +4,16 @@ import sqlite3
 import os
 import logging
 
+import click
+
 """
 Configuration for the Logger
 """
-logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+
+def success(msg):
+    """ Returns enhanced input """
+    return click.secho(msg, fg='green')
 
 """
 Create a database along with the table if the database is not present
@@ -15,14 +21,14 @@ Create a database along with the table if the database is not present
 if not os.path.isfile('./db.sqlite3'):
 	with open("db.sqlite3", "w+") as f:
 		conn = sqlite3.connect('db.sqlite3')
-		logging.info("Opened database successfully")
+		success("Opened database successfully")
 		conn.execute('''CREATE TABLE NOTES
 					(ID INTEGER PRIMARY KEY AUTOINCREMENT,
 					TITLE TEXT NOT NULL,
 					DUEDATE DATETIME,
 					COMMENTS TEXT,
 					STATUS BOOLEAN);''')
-		logging.info("Table created successfully")
+		success("Table created successfully")
 		conn.close()
 
 
@@ -35,7 +41,7 @@ def add_entry(title, duedate="", comment=""):
 	conn = sqlite3.connect('db.sqlite3')
 	query = f"INSERT INTO NOTES (TITLE,DUEDATE,COMMENTS,STATUS) VALUES ('{title}', '{duedate}', '{comment}', 0)"
 	conn.execute(query)
-	logging.info("Successfully added a task in the database")
+	success("Successfully added a task in the database")
 	""" Commit the changes and close connection with the database """
 	conn.commit()
 	conn.close()
@@ -47,7 +53,7 @@ def update_entry(id, title, duedate, comment, status):
 	conn = sqlite3.connect('db.sqlite3')
 	query = f"UPDATE NOTES SET TITLE = '{title}', DUEDATE = '{duedate}', COMMENTS = '{comment}', STATUS = '{status}' WHERE ID = {id}"
 	conn.execute(query)
-	logging.info("Successfully updated a task in the database")
+	success("Successfully updated a task in the database")
 	""" Commit the changes and close connection with the database """
 	conn.commit()
 	conn.close()
@@ -59,7 +65,7 @@ def delete_entry(id):
 	conn = sqlite3.connect('db.sqlite3')
 	query = f"DELETE FROM NOTES WHERE ID = {id}"
 	conn.execute(query)
-	logging.info("Successfully deleted a task from the database")
+	success("Successfully deleted a task from the database")
 	""" Commit the changes and close connection with the database """
 	conn.commit()
 	conn.close()
@@ -90,7 +96,7 @@ def fetch_entries():
 		entry.append(row[1])
 		entry.append(row[2])
 		entry.append(row[3])
-		if row[4] == '0':
+		if row[4] == 1:
 			status = "Done"
 		else:
 			status= "Not Done"
@@ -100,5 +106,3 @@ def fetch_entries():
 	conn.commit()
 	conn.close()
 	return entries
-
-fetch_entry(1)
