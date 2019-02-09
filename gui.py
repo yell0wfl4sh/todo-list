@@ -104,7 +104,7 @@ class ToDoApp(Gtk.Window):
         """ Intialise the window """
         Gtk.Window.__init__(self)
         self.set_title('To Do App')
-        self.set_default_size(600, 900)
+        self.set_default_size(910, 900)
         self.set_border_width(10)
         self.dateval = "(year=2019, month=02, day=10)"
         mainbox = Gtk.Box(spacing=10, orientation=Gtk.Orientation.VERTICAL)
@@ -148,6 +148,20 @@ class ToDoApp(Gtk.Window):
         listbox.set_size_request(10, 800)
         listbox.set_selection_mode(Gtk.SelectionMode.NONE)
 
+        row = Gtk.ListBoxRow()
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
+        hbox.set_homogeneous(True)
+        row.add(hbox)
+        row.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("grey"))
+        row.modify_fg(Gtk.StateType.NORMAL, Gdk.color_parse("white"))
+        row.set_size_request(10, 40)
+        heading = ("Title", "Comment", "Date", "Status", "")
+        for text in heading:
+            label1 = Gtk.Label(text, xalign=0)
+            hbox.pack_start(label1, True, True, 0)
+
+        listbox.add(row)
+
         all_entries = fetch_entries()
         for note in all_entries:
             row = Gtk.ListBoxRow()
@@ -172,8 +186,8 @@ class ToDoApp(Gtk.Window):
     def update_display(self):
         listbox = self.listbox
         elements = listbox.get_children()
-        for note in elements:
-            listbox.remove(note)
+        for note in range(1, len(elements)):
+            listbox.remove(elements[note])
         all_entries = fetch_entries()
         for note in all_entries:
             row = Gtk.ListBoxRow()
