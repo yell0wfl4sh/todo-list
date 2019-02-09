@@ -6,7 +6,7 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import Gio
 import main
-from main import fetch_entries
+from main import fetch_entries, add_entry
 import sqlite3
 
 class CalDialog(Gtk.Dialog):
@@ -84,7 +84,6 @@ class ToDoApp(Gtk.Window):
         listbox = Gtk.ListBox()
         listbox.set_size_request(10, 800)
         listbox.set_selection_mode(Gtk.SelectionMode.NONE)
-        mainbox.add(listbox)
 
         all_entries = fetch_entries()
         for note in all_entries:
@@ -93,8 +92,8 @@ class ToDoApp(Gtk.Window):
             hbox.set_homogeneous(True)
             row.add(hbox)
 
-            for text in note:
-                label1 = Gtk.Label(text, xalign=0)
+            for text in range(1, 5):
+                label1 = Gtk.Label(note[text], xalign=0)
                 hbox.pack_start(label1, True, True, 0)
 
             updatebutton = Gtk.Button.new_with_label("Update")
@@ -103,7 +102,33 @@ class ToDoApp(Gtk.Window):
 
             listbox.add(row)
 
+        mainbox.add(listbox)
         self.add(mainbox)
+        self.listbox = listbox
+
+    def update_display(self):
+        listbox = self.listbox
+        elements = listbox.get_children()
+        for note in elements:
+            listbox.remove(note)
+        all_entries = fetch_entries()
+        for note in all_entries:
+            row = Gtk.ListBoxRow()
+            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
+            hbox.set_homogeneous(True)
+            row.add(hbox)
+
+            for text in range(1, 5):
+                label1 = Gtk.Label(note[text], xalign=0)
+                hbox.pack_start(label1, True, True, 0)
+
+            updatebutton = Gtk.Button.new_with_label("Update")
+            updatebutton.connect("clicked", self.update_note)
+            hbox.pack_start(updatebutton, True, True, 0)
+
+            listbox.add(row)
+
+        listbox.show_all()
 
     def on_cal_clicked(self, widget):
         """ Open calender and get user selection """
@@ -116,7 +141,8 @@ class ToDoApp(Gtk.Window):
     def add_note(self, widget, title, comment):
         """ Add new note """
         datetime = self.parse_date()
-        print(title.props.text, comment.props.text, datetime)
+        add_entry(title.props.text, comment.props.text, datetime)
+        self.update_display()
 
     def update_note(self, widget):
         """ Update existing note """
