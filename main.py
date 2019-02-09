@@ -38,31 +38,37 @@ def add_entry(title, duedate="", comment=""):
 	logging.debug("Adding an entry in the database!")
 	query = f"INSERT INTO NOTES (TITLE,DUEDATE,COMMENTS,STATUS) VALUES ('{title}', '{duedate}', '{comment}', 0)"
 	conn.execute(query)
+	logging.info("Successfully added a task in the database")
 
 def update_entry(id, title, duedate, comment, status):
 	""" Update a task in the database """
 	logging.debug("Updating an entry in the database!")
 	query = f"UPDATE NOTES SET TITLE = '{title}', DUEDATE = '{duedate}', COMMENTS = '{comment}', STATUS = '{status}' WHERE ID = {id}"
 	conn.execute(query)
+	logging.info("Successfully updated a task in the database")
 
 def delete_entry(id):
 	""" Delete a task from the database """
 	logging.debug("Deleting an entry from the database!")
 	query = f"DELETE FROM NOTES WHERE ID = {id}"
 	conn.execute(query)
+	logging.info("Successfully deleted a task from the database")
 
 def fetch_entries():
 	""" Fetch the tasks from the database """
 	logging.debug("Fetching entries from the database!")
 	query = "SELECT * from NOTES"
 	cursor = conn.execute("SELECT * from NOTES")
+	entries = []
 	for row in cursor:
+		entry = []
 		logging.debug(f"TASK = {row[1]}")
+		entry.append(row[1])
 		logging.debug(f"DATE = {row[2]}")
+		entry.append(row[2])
 		logging.debug(f"COMMENTS = {row[3]}")
+		entry.append(row[3])
+		entries.append(entry)
+	return entries
 
 conn.commit()
-"""
-Close the connection with database
-"""
-conn.close()
