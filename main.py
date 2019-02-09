@@ -7,7 +7,7 @@ import logging
 """
 Configuration for the Logger
 """
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
 """
 Create a database along with the table if the database is not present
@@ -64,26 +64,41 @@ def delete_entry(id):
 	conn.commit()
 	conn.close()
 
+def fetch_entry(id):
+	""" Fetch a particular task from the database """
+	""" Setup connection with database """
+	conn = sqlite3.connect('db.sqlite3')
+	logging.debug("Fetching an entry from the database!")
+	query = f"SELECT * from NOTES WHERE ID={id}"
+	cursor = conn.execute(query)
+	entry = cursor.fetchone()
+	conn.commit()
+	conn.close()
+	return entry
+
 def fetch_entries():
 	""" Fetch the tasks from the database """
 	""" Setup connection with database """
 	conn = sqlite3.connect('db.sqlite3')
 	logging.debug("Fetching entries from the database!")
 	query = "SELECT * from NOTES"
-	cursor = conn.execute("SELECT * from NOTES")
+	cursor = conn.execute(query)
 	entries = []
 	for row in cursor:
 		entry = []
-		logging.debug(f"ID = {row[0]}")
 		entry.append(row[0])
-		logging.debug(f"TASK = {row[1]}")
 		entry.append(row[1])
-		logging.debug(f"DATE = {row[2]}")
 		entry.append(row[2])
-		logging.debug(f"COMMENTS = {row[3]}")
 		entry.append(row[3])
+		if row[4] == '0':
+			status = "Done"
+		else:
+			status= "Not Done"
+		entry.append(status)
 		entries.append(entry)
 	""" Commit the changes and close connection with the database """
 	conn.commit()
 	conn.close()
 	return entries
+
+fetch_entry(1)
