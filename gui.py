@@ -5,6 +5,8 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import Gio
+import main
+from main import fetch_entries
 import sqlite3
 
 class CalDialog(Gtk.Dialog):
@@ -41,7 +43,7 @@ class ToDoApp(Gtk.Window):
         self.set_title('To Do App')
         self.set_default_size(600, 900)
         self.set_border_width(10)
-
+        self.dateval = "(year=2019, month=11, day=19)"
         mainbox = Gtk.Box(spacing=10, orientation=Gtk.Orientation.VERTICAL)
 
         hbox1 = Gtk.Box(spacing=10, orientation=Gtk.Orientation.HORIZONTAL)
@@ -74,7 +76,7 @@ class ToDoApp(Gtk.Window):
         hbox2.pack_start(cal_button, True, True, 0)
 
         addbutton = Gtk.Button.new_with_label("Add")
-        addbutton.connect("clicked", self.add_note)
+        addbutton.connect("clicked", self.add_note, entry1, entry2)
         hbox2.pack_start(addbutton, True, True, 0)
         
         mainbox.add(hbox2)
@@ -84,25 +86,16 @@ class ToDoApp(Gtk.Window):
         listbox.set_selection_mode(Gtk.SelectionMode.NONE)
         mainbox.add(listbox)
 
-        conn = sqlite3.connect('test.db')
-        cursor = conn.execute("SELECT * from NOTES")
-        for note in cursor:
+        all_entries = fetch_entries()
+        for note in all_entries:
             row = Gtk.ListBoxRow()
             hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
             hbox.set_homogeneous(True)
             row.add(hbox)
 
-            label1 = Gtk.Label(note[1], xalign=0)
-            hbox.pack_start(label1, True, True, 0)
-
-            label2 = Gtk.Label(note[2], xalign=0)
-            hbox.pack_start(label2, True, True, 0)
-
-            label3 = Gtk.Label(note[3], xalign=0)
-            hbox.pack_start(label3, True, True, 0)
-
-            label4 = Gtk.Label(note[4], xalign=0)
-            hbox.pack_start(label4, True, True, 0)
+            for text in note:
+                label1 = Gtk.Label(text, xalign=0)
+                hbox.pack_start(label1, True, True, 0)
 
             updatebutton = Gtk.Button.new_with_label("Update")
             updatebutton.connect("clicked", self.update_note)
@@ -110,7 +103,6 @@ class ToDoApp(Gtk.Window):
 
             listbox.add(row)
 
-        conn.close()
         self.add(mainbox)
 
     def on_cal_clicked(self, widget):
@@ -118,16 +110,31 @@ class ToDoApp(Gtk.Window):
         dialog = CalDialog(self)
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
-            print(dialog.value)
+            self.dateval = str(dialog.value)
         dialog.destroy()
 
-    def add_note(self, widget):
+    def add_note(self, widget, title, comment):
         """ Add new note """
-        pass
+        datetime = self.parse_date()
+        print(title.props.text, comment.props.text, datetime)
 
     def update_note(self, widget):
         """ Update existing note """
         pass
+
+    def parse_date(self):
+        vals = (self.dateval).split(',')
+        datetime = vals[0][-4:]
+        if(len(vals[1])==8):
+            datetime = datetime + "-0" + vals[1][-1:]
+        else:
+            datetime = datetime + "-" +  vals[1][-2:]
+
+        if(len(vals[2])==7):
+            datetime = datetime + "-0" + vals[2][-2:-1]
+        else:
+            datetime = datetime + "-" + vals[2][-3:-1]
+        return datetime
 
 win = ToDoApp()
 win.connect("destroy", Gtk.main_quit)
