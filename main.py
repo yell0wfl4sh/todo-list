@@ -11,6 +11,7 @@ Configuration for the Logger
 """
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 
+
 def success(msg):
     """ Returns enhanced input """
     return click.secho(msg, fg='green')

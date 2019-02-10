@@ -3,6 +3,7 @@ import sqlite3
 
 from tabulate import tabulate
 import click
+
 import main
 from main import add_entry, update_entry, delete_entry, fetch_entry, fetch_entries
 
@@ -64,9 +65,19 @@ def update(id, task, date, comment):
 
 
 @cli.command()
-def delete():
-	"Incomplete: Delete an task in the to-do list"
-	pass
+@click.argument('id', nargs=1, required=False, metavar="ID")
+def delete(id):
+	"Delete an task in the to-do list"
+	if id is None:
+		entries = fetch_entries()
+		click.secho(tabulate(entries, headers=['ID', 'Task', 'Due Date', 'Notes', 'Status'], tablefmt='orgtbl'), fg='yellow')
+		while not id or id.isspace():
+			id = cli_input("Enter the ID of the task to be deleted: ")
+	entry = fetch_entry(id)
+	if entry is None:
+		click.secho("Invalid ID", fg='red')
+		sys.exit()
+	delete_entry(id)
 
 @cli.command()
 def show():
